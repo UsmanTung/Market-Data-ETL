@@ -8,7 +8,7 @@ from pathlib import Path
 # Simulates a live data fetch
 
 class LiveExtractor:
-    def __init__(self, tickers, startingPrices, interval=1, output_dir="data/raw"):
+    def __init__(self, tickers, startingPrices, interval=0.01, output_dir="data/raw"):
         self.startingPrices = startingPrices
         self.tickers = tickers
         # seconds between updates
@@ -23,19 +23,19 @@ class LiveExtractor:
         timestamp = datetime.now(timezone.utc)
         # Random price movements for each ticker
         for t in self.tickers:
-            change = np.random.normal(0, 0.2)
-            self.current_prices[t] = max(0.1, self.current_prices[t] + change)
+            change = np.random.normal(0, 0.5)
+            self.current_prices[t] = self.current_prices[t] + change
             rows.append({
-                "timestamp": timestamp,
-                "ticker": t,
-                "price": round(self.current_prices[t], 2),
-                "volume": np.random.randint(100, 1000)
+                "Timestamp": timestamp,
+                "Ticker": t,
+                "Price": round(self.current_prices[t], 2),
+                "Volume": np.random.randint(100, 1000)
             })
         return pd.DataFrame(rows)
 
 
     # Writes ticks to csv
-    def stream_to_csv(self, duration=30):
+    def stream_to_csv(self, duration=5):
         output_file = self.output_dir / "stream_ticks.csv"
         start_time = time.time()
         print(f"Simulating market data for {duration} seconds...")

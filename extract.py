@@ -2,6 +2,7 @@ import yfinance as yf
 import pandas as pd
 from pathlib import Path
 
+#   Cannot fetch data from yfinance live
 
 class DataFetcher:
     def __init__(self, tickers, start, end, interval):
