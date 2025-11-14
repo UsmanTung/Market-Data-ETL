@@ -5,7 +5,7 @@ import live_load
 def main():
 
     tickers = ["NVDA"]
-    startingPrices = [100.0, 200.0, 300.0, 400.0, 500.0]
+    startingPrices = [100.0]
     #start = "2025-11-09"
     #end = "2025-11-11"
 
