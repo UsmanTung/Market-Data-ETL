@@ -18,7 +18,7 @@ class ThreadedTransformer(Thread):
                 time.sleep(0.025)
                 continue
 
-            ticks = list(extractDeque)[-self.ticks_per_bar:]
+            ticks = [extractDeque.popleft() for _ in range(self.ticks_per_bar)]
             df = pd.DataFrame(ticks)
             df = df.sort_values("Timestamp")
             ohlcv = {

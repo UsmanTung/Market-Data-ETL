@@ -17,11 +17,13 @@ class ThreadedExtractor(Thread):
         self.duration = duration
 
     def run(self):
-        timestamp = datetime.now(timezone.utc)
+        curr = datetime.now(timezone.utc)
     
-        while datetime.now(timezone.utc) - timestamp < timedelta(seconds=self.duration):
+        while datetime.now(timezone.utc) - curr < timedelta(seconds=self.duration):
+            
             for t in self.tickers:
                 change = np.random.normal(0, 0.5)
+                timestamp = datetime.now(timezone.utc)
                 self.current_prices[t] = self.current_prices[t] + change
                 extractDeque.append({
                     "Timestamp": timestamp,
