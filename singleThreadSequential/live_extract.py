@@ -16,7 +16,7 @@ class LiveExtractor:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         # simulate starting prices
-        self.current_prices = {t: s + np.random.randn() for t, s in zip(tickers, startingPrices)}
+        self.current_prices = {t: s for t, s in zip(tickers, startingPrices)}
 
     def __generate_tick(self):
         rows = []
