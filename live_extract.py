@@ -8,7 +8,7 @@ from pathlib import Path
 # Simulates a live data fetch
 
 class LiveExtractor:
-    def __init__(self, tickers, startingPrices, interval=0.01, output_dir="data/raw"):
+    def __init__(self, tickers, startingPrices, interval=0.1, output_dir="data/raw"):
         self.startingPrices = startingPrices
         self.tickers = tickers
         # seconds between updates
