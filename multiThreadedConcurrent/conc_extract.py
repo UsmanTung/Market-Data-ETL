@@ -29,7 +29,7 @@ class ThreadedExtractor(Thread):
                     "Timestamp": timestamp,
                     "Ticker": t,
                     "Price": round(self.current_prices[t], 2),
-                    "Volume": np.random.randint(100, 1000)
+                    "Volume": np.random.randint(5, 25)
                 })
             time.sleep(self.interval)
         #print(len(extractDeque))

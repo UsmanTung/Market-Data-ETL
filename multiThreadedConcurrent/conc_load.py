@@ -3,6 +3,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import pandas as pd
 
 
@@ -14,7 +15,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 app.layout = dbc.Container([
     html.H1("Mock Market", className="text-center mt-3"),
     dcc.Graph(id="live-chart"),
-    dcc.Interval(id="update-interval", interval=100, n_intervals=0)
+    dcc.Interval(id="update-interval", interval=150)
 ], fluid=True)
 
 def init_callbacks(transformer):
@@ -23,35 +24,63 @@ def init_callbacks(transformer):
         Input("update-interval", "n_intervals")
     )
     def update_chart(_):
-        fig = go.Figure()
+        fig = make_subplots(
+            rows=2, cols=1,
+            shared_xaxes=True,
+            vertical_spacing=0.03,
+            row_heights=[0.8, 0.2]
+        )
 
-        # Candle
+        # Full candle
         if transformDeque:
-            df_bars = pd.DataFrame(list(transformDeque))
-            fig.add_trace(go.Candlestick(
-                x=df_bars["Timestamp"].dt.strftime("%H:%M:%S"),
-                open=df_bars["open"],
-                high=df_bars["high"],
-                low=df_bars["low"],
-                close=df_bars["close"],
-                name="OHLC",
-                showlegend=False
-            ))
+            dfBars = pd.DataFrame(list(transformDeque))
+            fig.add_trace(
+                go.Candlestick(
+                    x=dfBars["Timestamp"].dt.strftime("%H:%M:%S"),
+                    open=dfBars["open"],
+                    high=dfBars["high"],
+                    low=dfBars["low"],
+                    close=dfBars["close"],
+                    name="OHLC"
+                ),
+                row=1, col=1
+            )
+            fig.add_trace(
+                go.Bar(
+                    x=dfBars["Timestamp"].dt.strftime("%H:%M:%S"),
+                    y=dfBars["volume"],
+                    marker_color="rgba(0,150,255,0.6)",
+                    name="Volume"
+                ),
+                row=2, col=1
+            )
 
         curr = transformer.currentCandle
+
+        # Not full candle
         if curr:
-            fig.add_trace(go.Candlestick(
-                x=[curr["Timestamp"].strftime("%H:%M:%S")],
-                open=[curr["open"]],
-                high=[curr["high"]],
-                low=[curr["low"]],
-                close=[curr["close"]],
-                increasing_line_color="green",
-                decreasing_line_color="red",
-                showlegend=False
-            ))
+            ts = curr["Timestamp"].strftime("%H:%M:%S")
+            fig.add_trace(
+                go.Candlestick(
+                    x=[ts],
+                    open=[curr["open"]],
+                    high=[curr["high"]],
+                    low=[curr["low"]],
+                    close=[curr["close"]],
+                    showlegend=False
+                ),
+                row=1, col=1
+            )
 
-
+            fig.add_trace(
+                go.Bar(
+                    x=[ts],
+                    y=[curr["volume"]],
+                    marker_color="rgba(0,150,255,0.6)",
+                    showlegend=False
+                ),
+                row=2, col=1
+            )
 
         fig.update_layout(
             title="NVDA",
@@ -60,5 +89,9 @@ def init_callbacks(transformer):
             xaxis_rangeslider_visible=False,
             uirevision="fixed"
         )
+
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(title_text="Price", showgrid=False, side="right", row=1, col=1)
+        fig.update_yaxes(title_text="Volume", side="right", row=2, col=1, fixedrange=True)
 
         return fig
