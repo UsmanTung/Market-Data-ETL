@@ -1,4 +1,3 @@
-# transformer.py
 import pandas as pd
 import time
 from threading import Thread
@@ -8,29 +7,58 @@ from conc_extract import extractDeque
 transformDeque = deque()
 
 class ThreadedTransformer(Thread):
-    def __init__(self, ticks_per_bar=10):
+    def __init__(self, ticksPerBar=100):
         super().__init__(daemon=False)
-        self.ticks_per_bar = ticks_per_bar
+        self.ticksPerBar = ticksPerBar
+        self.currentCandle = None
 
     def run(self):
         while True:
-            if len(extractDeque) < self.ticks_per_bar:
-                time.sleep(0.025)
+            if not extractDeque:
+                time.sleep(0.005)
                 continue
 
-            ticks = [extractDeque.popleft() for _ in range(self.ticks_per_bar)]
-            df = pd.DataFrame(ticks)
-            df = df.sort_values("Timestamp")
-            ohlcv = {
-                "Timestamp": df["Timestamp"].iloc[-1],
-                "Ticker": df["Ticker"].iloc[0],
-                "open": df["Price"].iloc[0],
-                "high": df["Price"].max(),
-                "low": df["Price"].min(),
-                "close": df["Price"].iloc[-1],
-                "volume": df["Volume"].sum(),
-            }
-            transformDeque.append(ohlcv)
-            time.sleep(0.05)
+            tick = extractDeque.popleft()
+
+            ts = tick["Timestamp"]
+            secondTs = ts.replace(microsecond=0)
+            price = tick["Price"]
+            volume = tick["Volume"]
+
+            # Start new candle if none exists
+            if self.currentCandle is None:
+                self.currentStartTime = secondTs
+                self.currentCandle = {
+                    "Timestamp": ts,
+                    "open": price,
+                    "high": price,
+                    "low": price,
+                    "close": price,
+                    "volume": volume
+                }
+                continue
+
+            # if 1 second passed finalize candle
+            if (ts - self.currentStartTime).total_seconds() >= 1.0:
+                transformDeque.append(self.currentCandle)
+
+                # Start new candle
+                self.currentStartTime = secondTs
+                self.currentCandle = {
+                    "Timestamp": ts,
+                    "open": price,
+                    "high": price,
+                    "low": price,
+                    "close": price,
+                    "volume": volume
+                }
+                continue
+
+            # Update live candle
+            self.currentCandle["Timestamp"] = ts
+            self.currentCandle["close"] = price
+            self.currentCandle["high"] = max(self.currentCandle["high"], price)
+            self.currentCandle["low"] = min(self.currentCandle["low"], price)
+            self.currentCandle["volume"] += volume
             #print(len(transformDeque))
 

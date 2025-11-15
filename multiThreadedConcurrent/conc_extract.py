@@ -8,7 +8,7 @@ from collections import deque
 extractDeque = deque()
 
 class ThreadedExtractor(Thread):
-    def __init__(self, tickers, startingPrices, interval=0.1, duration = 10):
+    def __init__(self, tickers, startingPrices, interval=0.01, duration = 10):
         super().__init__(daemon=False)
         self.startingPrices = startingPrices
         self.tickers = tickers

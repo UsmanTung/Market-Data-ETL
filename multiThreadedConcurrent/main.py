@@ -1,14 +1,16 @@
 from conc_extract import ThreadedExtractor
 from conc_transform import ThreadedTransformer
-from conc_load import app
-
-
+import conc_load
 def main():
-    extractor = ThreadedExtractor(["NVDA"], [100], interval=0.1, duration = 100)
-    transformer = ThreadedTransformer()
+    interval = 0.1
+    extractor = ThreadedExtractor(["NVDA"], [100], interval=interval, duration = 30)
+    transformer = ThreadedTransformer(int(1/interval))
+
     extractor.start()
     transformer.start()
-    app.run(debug=True)
+
+    conc_load.init_callbacks(transformer)
+    conc_load.app.run(debug=True)
 
 
 if __name__ == "__main__":
