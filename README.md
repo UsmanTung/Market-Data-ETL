@@ -9,7 +9,10 @@ A lightweight market‑data simulator and ETL pipeline supporting **two fully im
 
 `pip install -r requirements.txt`
 
-Run it for 100 seconds:
+In a browser open:
+`http://127.0.0.1:8050/`
+
+Then in the terminal run it for 100 seconds with:
 `python3 multiThreadedConcurrent/main.py --duration 100`
 
 
